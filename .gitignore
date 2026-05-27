@@ -1,0 +1,59 @@
+# Git ignore for combined Angular (Node), .NET, and xUnit projects
+
+### Visual Studio / .NET ###
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.nupkg
+publish/
+.nuget/
+packages/
+project.assets.json
+project.lock.json
+
+### Rider / JetBrains ###
+.idea/
+*.sln.iml
+
+### VS Code ###
+.vscode/
+
+### Node / Angular ###
+node_modules/
+.angular/
+dist/
+build/
+out/
+.tmp/
+temp/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+.pnp.*
+
+### TypeScript ###
+*.tsbuildinfo
+
+### Environment / secrets ###
+.env
+.env.*
+appsettings.Development.json
+
+### Test & coverage ###
+*.coverage
+*.coveragexml
+xunit.runner.json
+
+### OS files ###
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### Misc ###
+*.log
