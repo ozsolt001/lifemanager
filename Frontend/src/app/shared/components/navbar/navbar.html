@@ -1,0 +1,28 @@
+<nav class="bg-sky-100 fixed w-full z-20 top-0 border-b border-default">
+  <div class="flex flex-wrap items-center justify-between mx-auto p-4">
+    <div class="flex items-center space-x-3 rtl:space-x-reverse">
+        <a routerLink="/">
+            <span class="self-center text-xl text-heading">LifeManager</span>
+        </a>
+    </div>
+    <div class="items-center justify-between mr-2 w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+      <ul class="flex flex-col p-4 md:p-0 font-medium border border-default rounded-base md:space-x-8 rtl:space-x-reverse md:flex-row md:border-0">
+        <li [class]="movingListElement">
+          <a routerLink="/" [class]="navigationListElement + ' hover:bg-rose-400 '">Home</a>
+        </li>
+        <li [class]="movingListElement">
+          <a routerLink="/sports" [class]="navigationListElement + ' hover:bg-purple-400 '">Sports</a>
+        </li>
+        <li [class] ="movingListElement">
+          <a routerLink="/diet" [class]="navigationListElement + ' hover:bg-blue-700 '">Diet</a>
+        </li>
+        <li [class]="movingListElement">
+          <a routerLink="/books" [class]="navigationListElement + ' hover:bg-amber-400 '">Books</a>
+        </li>
+        <li [class]="movingListElement">
+          <a routerLink="/music" [class]="navigationListElement + ' hover:bg-emerald-700 '">Music</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
