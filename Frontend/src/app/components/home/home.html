@@ -1,6 +1,50 @@
 <h1>home works!</h1>
 
-<app-openmoji-icon code="1F1E6" label="Futás" />
-<app-openmoji-icon code="1F1E6" label="Úszás" />
+<button type="button"
+    role="checkbox"
+    [attr.aria-checked]="isSelected(activity[0])"
+    (click)="toggleActivity(activity[0])"
+    
+    class="flex flex-row justify-between items-center p-3 bg-neutral-primary-soft max-w-xs border border-default rounded-base shadow-xs hover:bg-sky-100">
+    <div>
+        <app-openmoji-icon [code]="activity[0].icon"
+        [label]="activity[0].title" [size]="100" />
+    </div>
+    <div class="flex flex-col justify-between md:p-1 leading-normal">
+        <h5 class="font-bold tracking-tight text-heading">{{ activity[0].title }}</h5>
+        <p class="text-body">{{ activity[0].description }}</p>
+    </div>
+    <div class="flex flex-row justify-between">
+        @if (isSelected(activity[0])) {
+            <app-openmoji-icon code="2714" label="Yes" [size]="80" />
+         } @else {
+            <app-openmoji-icon code="274C" label="No" [size]="80" />
+         }
+    </div>
+</button>
+
+<button type="button"
+    role="checkbox"
+    [attr.aria-checked]="isSelected(activity[1])"
+    (click)="toggleActivity(activity[1])"
+    
+    class="flex flex-row justify-between items-center p-3 bg-neutral-primary-soft max-w-xs border border-default rounded-base shadow-xs hover:bg-sky-100">
+    <div>
+        <app-openmoji-icon [code]="activity[1].icon"
+        [label]="activity[1].title" [size]="100" />
+    </div>
+    <div class="flex flex-col justify-between md:p-1 leading-normal">
+        <h5 class="font-bold tracking-tight text-heading">{{ activity[1].title }}</h5>
+        <p class="text-body">{{ activity[1].description }}</p>
+    </div>
+    <div class="flex flex-row justify-between">
+        @if (isSelected(activity[1])) {
+            <app-openmoji-icon code="2714" label="Yes" [size]="80" />
+         } @else {
+            <app-openmoji-icon code="274C" label="No" [size]="80" />
+         }
+    </div>
+</button>
+
 <app-openmoji-icon code="1F1E6" label="Hamburger" />
 <app-openmoji-icon code="1F1E6" label="Leves" />
