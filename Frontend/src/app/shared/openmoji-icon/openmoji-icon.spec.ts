@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OpenmojiIcon } from './openmoji-icon';
+import { OpenmojiIconComponent } from './openmoji-icon';
 
-describe('OpenmojiIcon', () => {
-  let component: OpenmojiIcon;
-  let fixture: ComponentFixture<OpenmojiIcon>;
+describe('OpenmojiIconComponent', () => {
+  let component: OpenmojiIconComponent;
+  let fixture: ComponentFixture<OpenmojiIconComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OpenmojiIcon],
+      imports: [OpenmojiIconComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(OpenmojiIcon);
+    fixture = TestBed.createComponent(OpenmojiIconComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

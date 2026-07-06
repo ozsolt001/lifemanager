@@ -1,1 +1,98 @@
-<p>sports works!</p>
+<main class="grid h-full w-full [grid-template-rows:minmax(0,7fr)_minmax(0,3fr)]">
+  <section class="grid min-h-0 overflow-hidden [grid-template-rows:auto_minmax(0,1fr)]" aria-labelledby="catalog-title">
+    <div class="flex min-h-11 items-center justify-between bg-[#eef3fb] px-4 py-2">
+      <h2 id="catalog-title" class="sr-only">Available sports</h2>
+      <span class="text-sm text-[#657087]">{{ sports.length }} sports</span>
+    </div>
+
+    <div class="h-full overflow-y-auto bg-white">
+      <table class="w-full border-collapse">
+        <thead class="sticky top-0 z-[1] bg-[#eef3fb]">
+          <tr>
+            <th class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left text-xs uppercase tracking-[0.08em] text-[#657087] max-[600px]:px-2.5 max-[600px]:py-3" scope="col">Sport</th>
+            <th class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left text-xs uppercase tracking-[0.08em] text-[#657087] max-[600px]:px-2.5 max-[600px]:py-3" scope="col">Category</th>
+            <th class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left text-xs uppercase tracking-[0.08em] text-[#657087] max-[600px]:px-2.5 max-[600px]:py-3" scope="col"><span class="sr-only">Selection status</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sport of sports; track sport.id) {
+            <tr
+              class="cursor-pointer transition-colors duration-150 hover:bg-[#f1f6ff] focus-visible:bg-[#f1f6ff] focus-visible:outline-none"
+              tabindex="0"
+              [ngClass]="{ 'bg-blue-50': isSelected(sport.id) }"
+              (click)="openSetDialog(sport)"
+              (keydown.enter)="openSetDialog(sport)"
+              (keydown.space)="openSetDialog(sport); $event.preventDefault()"
+            >
+              <th class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left max-[600px]:px-2.5 max-[600px]:py-3" scope="row">{{ sport.name }}</th>
+              <td class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left max-[600px]:px-2.5 max-[600px]:py-3">{{ sport.category }}</td>
+              <td class="w-28 border-b border-[#edf0f5] px-4 py-[0.9rem] text-right text-sm font-bold text-blue-600 max-[600px]:w-auto max-[600px]:px-2.5 max-[600px]:py-3">
+                <span>{{ isSelected(sport.id) ? 'Edit sets' : 'Select' }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="grid min-h-0 overflow-hidden border-t-2 border-[#dce2ec] bg-[#f5f7fb] [grid-template-rows:auto_minmax(0,1fr)]" aria-labelledby="chosen-title">
+    <div class="flex min-h-11 items-center justify-between bg-[#eef3fb] px-4 py-2">
+      <h2 id="chosen-title" class="m-0 text-xl">Your sports</h2>
+      <span class="text-sm text-[#657087]">{{ selectedSports.length }} selected</span>
+    </div>
+
+    @if (selectedSports.length) {
+      <div class="flex h-full gap-4 overflow-x-auto px-4 py-3">
+        @for (sport of selectedSports; track sport.id) {
+          <article class="relative h-full flex-[0_0_190px] overflow-hidden rounded-2xl border border-[#dce2ec] bg-white shadow-[0_8px_24px_rgb(41_55_80_/_8%)]">
+            <button class="absolute right-[0.65rem] top-2 z-[1] cursor-pointer border-0 bg-transparent text-[1.4rem] text-[#657087]" type="button" (click)="removeSport(sport.id)" [attr.aria-label]="'Remove ' + sport.name">
+              &times;
+            </button>
+            <button class="flex h-full w-full cursor-pointer flex-col items-start gap-[0.55rem] border-0 bg-transparent p-5 text-left text-inherit" type="button" (click)="openSetDialog(sport)">
+              <span class="text-xs font-extrabold uppercase tracking-[0.12em] text-blue-600">{{ sport.category }}</span>
+              <strong class="text-lg">{{ sport.name }}</strong>
+              <span class="mt-auto text-xl font-extrabold text-blue-600">{{ sport.sets }} {{ sport.sets === 1 ? 'set' : 'sets' }}</span>
+            </button>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="m-0 grid h-full place-items-center p-4 text-center text-[#657087]">No sports selected yet. Choose one from the table above.</p>
+    }
+  </section>
+</main>
+
+@if (activeSport) {
+  <div class="fixed inset-0 z-10 grid place-items-center bg-[rgb(20_30_48_/_55%)] p-4" (click)="closeSetDialog()">
+    <section
+      class="relative w-[min(420px,100%)] rounded-[1.25rem] bg-white p-8 shadow-[0_24px_80px_rgb(0_0_0_/_25%)]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="set-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="absolute right-3.5 top-3 z-[1] cursor-pointer border-0 bg-transparent text-[1.4rem] text-[#657087]" type="button" (click)="closeSetDialog()" aria-label="Close dialog">&times;</button>
+      <p class="mt-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-600">{{ activeSport.category }}</p>
+      <h2 id="set-dialog-title" class="mb-6 mt-0 text-3xl">{{ activeSport.name }}</h2>
+      <label class="mb-2 block font-bold" for="set-count">How many sets will you do?</label>
+      <input
+        class="w-full rounded-[0.65rem] border border-[#b9c3d2] px-4 py-[0.85rem] font-[inherit] focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/_20%)]"
+        id="set-count"
+        name="setCount"
+        type="number"
+        min="1"
+        step="1"
+        required
+        [(ngModel)]="setCount"
+        (keydown.enter)="saveSport()"
+      />
+      <div class="mt-6 flex justify-end gap-3">
+        <button class="cursor-pointer rounded-[0.65rem] border-0 bg-[#eef1f6] px-4 py-3 font-bold text-[#3d485d]" type="button" (click)="closeSetDialog()">Cancel</button>
+        <button class="cursor-pointer rounded-[0.65rem] border-0 bg-blue-600 px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50" type="button" [disabled]="setCount < 1 || !setCount" (click)="saveSport()">
+          Save sport
+        </button>
+      </div>
+    </section>
+  </div>
+}
