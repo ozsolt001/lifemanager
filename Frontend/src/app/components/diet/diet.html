@@ -1,0 +1,179 @@
+<main class="grid h-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+  <header class="border-b border-[#dbeafe] bg-white px-4 py-3">
+    <div class="mx-auto flex max-w-6xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="m-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-700">Diet planner</p>
+        <h1 class="m-0 text-2xl font-bold text-[#172033]">Daily food and body tracker</h1>
+      </div>
+
+      <nav class="grid grid-cols-4 gap-2 rounded-lg bg-[#eff6ff] p-1" aria-label="Diet sections">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="rounded-md px-3 py-2 text-sm font-bold text-[#516070] transition-colors hover:bg-white hover:text-blue-700"
+            [ngClass]="{ 'bg-white text-blue-700 shadow-sm': activeSection === tab.id }"
+            type="button"
+            (click)="setSection(tab.id)"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </nav>
+    </div>
+  </header>
+
+  <section class="min-h-0 overflow-y-auto px-4 py-5">
+    <div class="mx-auto max-w-6xl">
+      @if (activeSection === 'metrics') {
+        <div class="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+          <section class="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-[0_10px_30px_rgb(37_99_235_/8%)]" aria-labelledby="metrics-title">
+            <h2 id="metrics-title" class="m-0 text-xl font-bold">Height and weight</h2>
+            <p class="mb-5 mt-1 text-sm text-[#657087]">Save your latest body values to extend the trend line.</p>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block font-bold" for="height-input">
+                Height
+                <span class="mt-2 flex items-center rounded-md border border-[#bfdbfe] bg-[#f8fbff] px-3 py-2 font-normal">
+                  <input
+                    id="height-input"
+                    class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold outline-none"
+                    type="number"
+                    min="1"
+                    step="1"
+                    [(ngModel)]="height"
+                  />
+                  <span class="text-sm text-[#657087]">cm</span>
+                </span>
+              </label>
+
+              <label class="block font-bold" for="weight-input">
+                Weight
+                <span class="mt-2 flex items-center rounded-md border border-[#bfdbfe] bg-[#f8fbff] px-3 py-2 font-normal">
+                  <input
+                    id="weight-input"
+                    class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold outline-none"
+                    type="number"
+                    min="1"
+                    step="0.1"
+                    [(ngModel)]="weight"
+                  />
+                  <span class="text-sm text-[#657087]">kg</span>
+                </span>
+              </label>
+            </div>
+
+            <button
+              class="mt-5 w-full rounded-md bg-blue-700 px-4 py-3 font-bold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              [disabled]="weight <= 0 || height <= 0"
+              (click)="saveMetrics()"
+            >
+              Save values
+            </button>
+          </section>
+
+          <section class="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-[0_10px_30px_rgb(37_99_235_/8%)]" aria-labelledby="trend-title">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 id="trend-title" class="m-0 text-xl font-bold">Weight trend</h2>
+                <p class="mt-1 text-sm text-[#657087]">Last saved values</p>
+              </div>
+              <div class="rounded-md bg-[#eff6ff] px-3 py-2 text-right">
+                <p class="m-0 text-xs font-bold uppercase tracking-[0.08em] text-blue-700">{{ trendLabel }}</p>
+                <p class="m-0 text-lg font-extrabold text-[#172033]">{{ trendValue > 0 ? '+' : '' }}{{ trendValue }} kg</p>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-lg bg-[#eff6ff] p-4">
+              <svg class="h-52 w-full overflow-visible" viewBox="0 0 320 160" role="img" aria-label="Weight history graph">
+                <line x1="0" y1="130" x2="320" y2="130" stroke="#bfdbfe" stroke-width="2" />
+                <line x1="0" y1="65" x2="320" y2="65" stroke="#bfdbfe" stroke-width="1" stroke-dasharray="4 6" />
+                <polyline [attr.points]="graphPoints" fill="none" stroke="#2563eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" />
+                @for (entry of weightHistory; track entry.label; let index = $index) {
+                  <text [attr.x]="weightHistory.length === 1 ? 160 : (index / (weightHistory.length - 1)) * 320" y="154" text-anchor="middle" fill="#657087" font-size="10">{{ entry.label }}</text>
+                }
+              </svg>
+            </div>
+
+            <div class="mt-4 grid gap-2 sm:grid-cols-4">
+              @for (entry of weightHistory.slice(-4); track entry.label) {
+                <div class="rounded-md border border-[#dbeafe] bg-[#f8fbff] p-3">
+                  <p class="m-0 text-xs font-bold uppercase tracking-[0.08em] text-[#657087]">{{ entry.label }}</p>
+                  <p class="m-0 text-lg font-extrabold">{{ entry.value }} kg</p>
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      } @else {
+        <div class="grid gap-4 lg:grid-cols-[1fr_0.95fr]">
+          <section class="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-[0_10px_30px_rgb(37_99_235_/8%)]" aria-labelledby="food-title">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="m-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-700">{{ activeMealTitle }}</p>
+                <h2 id="food-title" class="m-0 text-xl font-bold">Choose foods</h2>
+              </div>
+              <div class="rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700">{{ mealCalories() }} kcal</div>
+            </div>
+
+            <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              @for (food of activeMealOptions; track food.id) {
+                <button
+                  class="flex items-center gap-3 rounded-lg border border-[#dbeafe] bg-[#f8fbff] p-3 text-left transition-colors hover:border-blue-700 hover:bg-[#eff6ff]"
+                  type="button"
+                  (click)="addFood(food)"
+                >
+                  <span class="grid size-12 place-items-center rounded-full bg-white text-3xl shadow-sm" aria-hidden="true">{{ food.icon }}</span>
+                  <span class="min-w-0">
+                    <span class="block font-bold">{{ food.name }}</span>
+                    <span class="block text-sm text-[#657087]">{{ food.calories }} kcal</span>
+                  </span>
+                </button>
+              }
+            </div>
+          </section>
+
+          <section class="rounded-lg border border-[#dbeafe] bg-white p-5 shadow-[0_10px_30px_rgb(37_99_235_/8%)]" aria-labelledby="plate-title">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h2 id="plate-title" class="m-0 text-xl font-bold">Your plate</h2>
+                <p class="mt-1 text-sm text-[#657087]">Add foods from the list, remove them from the plate.</p>
+              </div>
+              <span class="rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700">{{ activePlate.length }} items</span>
+            </div>
+
+            <div class="mx-auto mt-6 grid aspect-square max-w-[360px] place-items-center rounded-full border-[14px] border-[#dbeafe] bg-[#fdfefe] shadow-inner">
+              @if (activePlate.length) {
+                <div class="flex max-h-full flex-wrap items-center justify-center gap-3 overflow-y-auto p-6">
+                  @for (food of activePlate; track $index; let index = $index) {
+                    <button
+                      class="grid size-16 place-items-center rounded-full bg-[#eff6ff] text-3xl shadow-sm transition-transform hover:scale-105"
+                      type="button"
+                      (click)="removeFood(index)"
+                      [attr.aria-label]="'Remove ' + food.name"
+                      [title]="food.name"
+                    >
+                      {{ food.icon }}
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="max-w-44 text-center text-sm font-bold text-[#657087]">Your {{ activeMealTitle.toLowerCase() }} plate is empty.</p>
+              }
+            </div>
+
+            @if (activePlate.length) {
+              <ul class="mt-5 grid gap-2">
+                @for (food of activePlate; track $index; let index = $index) {
+                  <li class="flex items-center justify-between rounded-md bg-[#eff6ff] px-3 py-2">
+                    <span class="font-bold">{{ food.icon }} {{ food.name }}</span>
+                    <button class="text-sm font-bold text-blue-700 hover:text-blue-900" type="button" (click)="removeFood(index)">Remove</button>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+      }
+    </div>
+  </section>
+</main>
