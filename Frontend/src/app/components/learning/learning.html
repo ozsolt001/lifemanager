@@ -1,0 +1,171 @@
+<main class="grid h-full grid-rows-[minmax(0,7fr)_minmax(190px,3fr)] overflow-hidden bg-[#f5f7fb]">
+  <section class="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] border-b-2 border-[#dce2ec] bg-white" aria-labelledby="learning-title">
+    <header class="border-b border-[#dbeafe] bg-[#eef3fb] px-4 py-4">
+      <div class="mx-auto flex max-w-6xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p class="m-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-700">Learning map</p>
+          <h1 id="learning-title" class="m-0 text-2xl font-bold">Concept hierarchy</h1>
+        </div>
+
+        <form class="flex flex-col gap-2 sm:flex-row" (ngSubmit)="addRootConcept()">
+          <label class="sr-only" for="root-concept">New root concept</label>
+          <input
+            id="root-concept"
+            class="min-w-0 rounded-md border border-[#b9c3d2] bg-white px-3 py-2 outline-none focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/20%)]"
+            name="rootConcept"
+            type="text"
+            placeholder="Add root concept"
+            [(ngModel)]="newRootTitle"
+          />
+          <button class="rounded-md bg-blue-700 px-4 py-2 font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50" type="submit" [disabled]="!newRootTitle.trim()">
+            Add concept
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <div class="min-h-0 overflow-y-auto px-4 py-5">
+      <div class="mx-auto max-w-6xl">
+        <ng-container *ngTemplateOutlet="treeTemplate; context: { nodes: concepts, path: [], depth: 1 }" />
+      </div>
+    </div>
+  </section>
+
+  <section class="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] bg-[#f5f7fb]" aria-labelledby="queue-title">
+    <header class="flex items-center justify-between bg-[#eef3fb] px-4 py-3">
+      <div>
+        <p class="m-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-700">Selected path queue</p>
+        <h2 id="queue-title" class="m-0 text-xl font-bold">Queue</h2>
+      </div>
+      <button class="rounded-md bg-white px-3 py-2 text-sm font-bold text-blue-700 shadow-sm hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50" type="button" [disabled]="!queue.length" (click)="clearQueue()">
+        Clear queue
+      </button>
+    </header>
+
+    <div class="min-h-0 overflow-x-auto overflow-y-hidden px-4 py-3">
+      @if (queue.length) {
+        <ol class="flex h-full max-w-full gap-3">
+          @for (item of queue; track trackQueueItem($index, item)) {
+            <li class="flex h-full min-w-[240px] max-w-[320px] flex-[0_0_280px] flex-col justify-between rounded-lg border border-[#dbeafe] bg-white p-4 shadow-[0_8px_24px_rgb(37_99_235_/8%)]">
+              <div>
+                <p class="m-0 text-xs font-extrabold uppercase tracking-[0.08em] text-blue-700">Queued concept</p>
+                <p class="mt-2 break-words text-base font-bold text-[#172033]">{{ formatPath(item.path) }}</p>
+              </div>
+              <button class="mt-4 self-start rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700 hover:text-blue-900" type="button" (click)="removeFromQueue(item.nodeId)">
+                Remove
+              </button>
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="m-0 grid h-full place-items-center text-center font-bold text-[#657087]">Select concepts or subconcepts from the tree to build your queue.</p>
+      }
+    </div>
+  </section>
+</main>
+
+<ng-template #treeTemplate let-nodes="nodes" let-path="path" let-depth="depth">
+  <div class="grid gap-5" [class.pl-6]="depth > 1" [class.border-l-2]="depth > 1" [class.border-[#bfdbfe]]="depth > 1">
+    @for (node of nodes; track trackNode($index, node)) {
+      @let nodePath = path.concat(node.title);
+      <article class="group">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <div class="flex items-start gap-2">
+              <button
+                class="mt-1 grid size-8 shrink-0 place-items-center rounded-md bg-[#eff6ff] text-sm font-extrabold text-blue-700 shadow-sm disabled:bg-transparent disabled:text-[#9aa5b5] disabled:shadow-none"
+                type="button"
+                [disabled]="!node.children.length"
+                (click)="toggleExpanded(node)"
+                [attr.aria-label]="node.expanded ? 'Collapse ' + node.title : 'Expand ' + node.title"
+              >
+                {{ node.children.length ? (node.expanded ? '-' : '+') : '' }}
+              </button>
+
+              <div class="min-w-0">
+                @switch (depth) {
+                  @case (1) {
+                    <h1 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h1>
+                  }
+                  @case (2) {
+                    <h2 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h2>
+                  }
+                  @case (3) {
+                    <h3 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h3>
+                  }
+                  @case (4) {
+                    <h4 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h4>
+                  }
+                  @case (5) {
+                    <h5 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h5>
+                  }
+                  @case (6) {
+                    <h6 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h6>
+                  }
+                  @default {
+                    <div class="m-0 break-words" role="heading" [attr.aria-level]="depth" [class]="headingClass(depth)">{{ node.title }}</div>
+                  }
+                }
+                <p class="mt-1 break-words text-sm text-[#657087]">{{ formatPath(nodePath) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 flex-wrap gap-2 pl-10 lg:pl-0">
+            <button
+              class="rounded-md bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              [disabled]="isQueued(node.id)"
+              (click)="queueConcept(node, nodePath)"
+            >
+              {{ isQueued(node.id) ? 'Queued' : 'Add to queue' }}
+            </button>
+            <button
+              class="rounded-md bg-red-50 px-3 py-2 text-sm font-bold text-red-700 hover:text-red-900"
+              type="button"
+              (click)="deleteConcept(node.id, nodePath)"
+            >
+              Delete
+            </button>
+            <button
+              class="rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              [disabled]="!canAddChild(depth)"
+              (click)="toggleAddChild(node)"
+            >
+              {{ isAddingChild(node) ? 'Cancel' : 'Add child' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- This  -->
+        <form class="ml-10 mt-3 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]" [ngClass]="{ hidden: !isAddingChild(node) }" (ngSubmit)="addSubconcept(node, depth)">
+          <label class="sr-only" [for]="'child-' + node.id">New subconcept under {{ node.title }}</label>
+          <input
+            class="min-w-0 rounded-md border border-[#bfdbfe] bg-white px-3 py-2 outline-none focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/20%)]"
+            [id]="'child-' + node.id"
+            [name]="'child-' + node.id"
+            type="text"
+            [placeholder]="canAddChild(depth) ? 'Add subconcept' : 'Maximum depth reached'"
+            [disabled]="!canAddChild(depth)"
+            [(ngModel)]="childDrafts[node.id]"
+          />
+          <button
+            class="rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
+            type="submit"
+            [disabled]="!canAddChild(depth) || !childDrafts[node.id]?.trim()"
+          >
+            Add child
+          </button>
+        </form>
+        <!-- End of this -->
+
+        @if (node.expanded && node.children.length) {
+          <div class="mt-5">
+            <ng-container *ngTemplateOutlet="treeTemplate; context: { nodes: node.children, path: nodePath, depth: depth + 1 }" />
+          </div>
+        }
+      </article>
+    }
+  </div>
+</ng-template>

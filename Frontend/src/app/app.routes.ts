@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Home } from './components/home/home';
 import { Sports } from './components/sports/sports';
 import { Diet } from './components/diet/diet';
+import { Learning } from './components/learning/learning';
 
 export const routes: Routes = [
     {
@@ -18,6 +19,12 @@ export const routes: Routes = [
         path: 'diet',
         title: 'Diet',
         component: Diet,
+    },
+    {
+        path: 'learning',
+        title: 'Learning',
+        component: Learning,
     }
 ];
+
 
