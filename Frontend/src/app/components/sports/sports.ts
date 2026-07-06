@@ -8,9 +8,22 @@ interface Sport {
   category: string;
 }
 
-interface SelectedSport extends Sport {
-  sets: number;
+enum MeasurementType {
+  Sets = 'sets',
+  Minutes = 'minutes',
 }
+
+type SelectedSport = Sport &
+  (
+    | {
+        measurementType: MeasurementType.Sets;
+        sets: number;
+      }
+    | {
+        measurementType: MeasurementType.Minutes;
+        minutes: number;
+      }
+  );
 
 @Component({
   selector: 'app-sports',
@@ -59,11 +72,17 @@ export class Sports {
 
   selectedSports: SelectedSport[] = [];
   activeSport: Sport | null = null;
+  measurementType: MeasurementType = MeasurementType.Sets;
   setCount = 1;
+  minuteCount = 1;
 
   openSetDialog(sport: Sport): void {
     this.activeSport = sport;
-    this.setCount = this.selectedSports.find((item) => item.id === sport.id)?.sets ?? 1;
+    const selectedSport = this.selectedSports.find((item) => item.id === sport.id);
+
+    this.measurementType = selectedSport?.measurementType ?? MeasurementType.Sets;
+    this.setCount = selectedSport?.measurementType === MeasurementType.Sets ? selectedSport.sets : 1;
+    this.minuteCount = selectedSport?.measurementType === MeasurementType.Minutes ? selectedSport.minutes : 1;
   }
 
   closeSetDialog(): void {
@@ -71,11 +90,20 @@ export class Sports {
   }
 
   saveSport(): void {
-    if (!this.activeSport || !Number.isInteger(this.setCount) || this.setCount < 1) {
+    if (!this.activeSport) {
       return;
     }
 
-    const selection: SelectedSport = { ...this.activeSport, sets: this.setCount };
+    const selectedValue = this.measurementType === MeasurementType.Sets ? this.setCount : this.minuteCount;
+
+    if (!Number.isInteger(selectedValue) || selectedValue < 1) {
+      return;
+    }
+
+    const selection: SelectedSport =
+      this.measurementType === MeasurementType.Sets
+        ? { ...this.activeSport, measurementType: MeasurementType.Sets, sets: selectedValue }
+        : { ...this.activeSport, measurementType: MeasurementType.Minutes, minutes: selectedValue };
     const existingIndex = this.selectedSports.findIndex((item) => item.id === selection.id);
 
     if (existingIndex === -1) {
@@ -102,3 +130,4 @@ export class Sports {
     this.closeSetDialog();
   }
 }
+

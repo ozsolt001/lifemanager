@@ -27,7 +27,7 @@
               <th class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left max-[600px]:px-2.5 max-[600px]:py-3" scope="row">{{ sport.name }}</th>
               <td class="border-b border-[#edf0f5] px-4 py-[0.9rem] text-left max-[600px]:px-2.5 max-[600px]:py-3">{{ sport.category }}</td>
               <td class="w-28 border-b border-[#edf0f5] px-4 py-[0.9rem] text-right text-sm font-bold text-blue-600 max-[600px]:w-auto max-[600px]:px-2.5 max-[600px]:py-3">
-                <span>{{ isSelected(sport.id) ? 'Edit sets' : 'Select' }}</span>
+                <span>{{ isSelected(sport.id) ? 'Edit' : 'Select' }}</span>
               </td>
             </tr>
           }
@@ -45,14 +45,18 @@
     @if (selectedSports.length) {
       <div class="flex h-full gap-4 overflow-x-auto px-4 py-3">
         @for (sport of selectedSports; track sport.id) {
-          <article class="relative h-full flex-[0_0_190px] overflow-hidden rounded-2xl border border-[#dce2ec] bg-white shadow-[0_8px_24px_rgb(41_55_80_/_8%)]">
+          <article class="relative h-full flex-[0_0_190px] overflow-hidden rounded-2xl border border-[#dce2ec] bg-white shadow-[0_8px_24px_rgb(41_55_80_/8%)]">
             <button class="absolute right-[0.65rem] top-2 z-[1] cursor-pointer border-0 bg-transparent text-[1.4rem] text-[#657087]" type="button" (click)="removeSport(sport.id)" [attr.aria-label]="'Remove ' + sport.name">
               &times;
             </button>
             <button class="flex h-full w-full cursor-pointer flex-col items-start gap-[0.55rem] border-0 bg-transparent p-5 text-left text-inherit" type="button" (click)="openSetDialog(sport)">
               <span class="text-xs font-extrabold uppercase tracking-[0.12em] text-blue-600">{{ sport.category }}</span>
               <strong class="text-lg">{{ sport.name }}</strong>
-              <span class="mt-auto text-xl font-extrabold text-blue-600">{{ sport.sets }} {{ sport.sets === 1 ? 'set' : 'sets' }}</span>
+              @if (sport.measurementType === 'sets') {
+                <span class="mt-auto text-xl font-extrabold text-blue-600">{{ sport.sets }} {{ sport.sets === 1 ? 'set' : 'sets' }}</span>
+              } @else {
+                <span class="mt-auto text-xl font-extrabold text-blue-600">{{ sport.minutes }} {{ sport.minutes === 1 ? 'minute' : 'minutes' }}</span>
+              }
             </button>
           </article>
         }
@@ -64,9 +68,9 @@
 </main>
 
 @if (activeSport) {
-  <div class="fixed inset-0 z-10 grid place-items-center bg-[rgb(20_30_48_/_55%)] p-4" (click)="closeSetDialog()">
+  <div class="fixed inset-0 z-10 grid place-items-center bg-[rgb(20_30_48_/55%)] p-4">
     <section
-      class="relative w-[min(420px,100%)] rounded-[1.25rem] bg-white p-8 shadow-[0_24px_80px_rgb(0_0_0_/_25%)]"
+      class="relative w-[min(420px,100%)] rounded-[1.25rem] bg-white p-8 shadow-[0_24px_80px_rgb(0_0_0_/25%)]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="set-dialog-title"
@@ -75,21 +79,52 @@
       <button class="absolute right-3.5 top-3 z-[1] cursor-pointer border-0 bg-transparent text-[1.4rem] text-[#657087]" type="button" (click)="closeSetDialog()" aria-label="Close dialog">&times;</button>
       <p class="mt-0 text-xs font-extrabold uppercase tracking-[0.12em] text-blue-600">{{ activeSport.category }}</p>
       <h2 id="set-dialog-title" class="mb-6 mt-0 text-3xl">{{ activeSport.name }}</h2>
-      <label class="mb-2 block font-bold" for="set-count">How many sets will you do?</label>
-      <input
-        class="w-full rounded-[0.65rem] border border-[#b9c3d2] px-4 py-[0.85rem] font-[inherit] focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/_20%)]"
-        id="set-count"
-        name="setCount"
-        type="number"
-        min="1"
-        step="1"
-        required
-        [(ngModel)]="setCount"
-        (keydown.enter)="saveSport()"
-      />
+
+      <fieldset class="mb-4 border-0 p-0">
+        <legend class="mb-2 block font-bold">Track by</legend>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex cursor-pointer items-center justify-center gap-2 rounded-[0.65rem] border border-[#b9c3d2] px-4 py-3 font-bold text-[#3d485d] has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-600">
+            <input class="size-4 accent-blue-600" type="radio" name="measurementType" value="sets" [(ngModel)]="measurementType" />
+            Sets
+          </label>
+          <label class="flex cursor-pointer items-center justify-center gap-2 rounded-[0.65rem] border border-[#b9c3d2] px-4 py-3 font-bold text-[#3d485d] has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-600">
+            <input class="size-4 accent-blue-600" type="radio" name="measurementType" value="minutes" [(ngModel)]="measurementType" />
+            Minutes
+          </label>
+        </div>
+      </fieldset>
+
+      @if (measurementType === 'sets') {
+        <label class="mb-2 block font-bold" for="set-count">How many sets will you do?</label>
+        <input
+          class="w-full rounded-[0.65rem] border border-[#b9c3d2] px-4 py-[0.85rem] font-[inherit] focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/20%)]"
+          id="set-count"
+          name="setCount"
+          type="number"
+          min="1"
+          step="1"
+          required
+          [(ngModel)]="setCount"
+          (keydown.enter)="saveSport()"
+        />
+      } @else if (measurementType === 'minutes') {
+        <label class="mb-2 block font-bold" for="minute-count">How many minutes will you do?</label>
+        <input
+          class="w-full rounded-[0.65rem] border border-[#b9c3d2] px-4 py-[0.85rem] font-[inherit] focus:border-blue-600 focus:outline-[3px_solid_rgb(37_99_235_/20%)]"
+          id="minute-count"
+          name="minuteCount"
+          type="number"
+          min="1"
+          step="1"
+          required
+          [(ngModel)]="minuteCount"
+          (keydown.enter)="saveSport()"
+        />
+      }
+
       <div class="mt-6 flex justify-end gap-3">
         <button class="cursor-pointer rounded-[0.65rem] border-0 bg-[#eef1f6] px-4 py-3 font-bold text-[#3d485d]" type="button" (click)="closeSetDialog()">Cancel</button>
-        <button class="cursor-pointer rounded-[0.65rem] border-0 bg-blue-600 px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50" type="button" [disabled]="setCount < 1 || !setCount" (click)="saveSport()">
+        <button class="cursor-pointer rounded-[0.65rem] border-0 bg-blue-600 px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50" type="button" [disabled]="measurementType === 'sets' ? setCount < 1 || !setCount : minuteCount < 1 || !minuteCount" (click)="saveSport()">
           Save sport
         </button>
       </div>
