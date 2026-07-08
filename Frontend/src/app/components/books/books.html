@@ -1,0 +1,370 @@
+<main
+  class="grid h-full min-h-0 grid-cols-[minmax(280px,0.95fr)_minmax(340px,1.05fr)] gap-px overflow-hidden bg-[#dce2ec] max-[860px]:grid-cols-1 max-[860px]:grid-rows-[minmax(320px,0.95fr)_minmax(360px,1.05fr)]"
+>
+  <section
+    class="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] bg-white"
+    aria-labelledby="selected-book-title"
+  >
+    <header class="min-h-[84px] border-b border-[#dce2ec] bg-[#eef3fb] px-6 py-[18px]">
+      <p class="m-0 mb-1 text-xs font-extrabold uppercase text-[#1f6f78]">Selected book</p>
+      <h1 id="selected-book-title" class="m-0 text-3xl font-extrabold leading-tight text-[#172033]">
+        Reading details
+      </h1>
+    </header>
+
+    <div class="min-h-0 overflow-auto p-7">
+      @if (selectedBook; as book) {
+        <article class="grid max-w-[680px] content-start gap-6">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="min-w-0">
+              <p class="m-0 mb-1 text-xs font-extrabold uppercase text-[#1f6f78]">
+                {{ book.type }}
+              </p>
+              <h2
+                class="m-0 max-w-[14ch] text-4xl font-black leading-tight text-[#172033] md:text-6xl"
+              >
+                {{ book.title }}
+              </h2>
+            </div>
+
+            <div class="flex shrink-0 flex-wrap gap-2.5">
+              <button
+                class="min-h-10 cursor-pointer rounded-lg border-0 bg-white px-3.5 font-extrabold text-[#324255] shadow-[inset_0_0_0_1px_#cbd5e1]"
+                type="button"
+                (click)="openEditDialog(book)"
+              >
+                Edit
+              </button>
+              <button
+                class="min-h-10 cursor-pointer rounded-lg border-0 bg-[#1f6f78] px-3.5 font-extrabold text-white"
+                type="button"
+                (click)="openProgressDialog(book)"
+              >
+                Mark progress
+              </button>
+            </div>
+          </div>
+
+          <dl class="m-0 grid grid-cols-2 gap-3 max-[860px]:grid-cols-1">
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Title</dt>
+              <dd class="m-0 mt-1 [overflow-wrap:anywhere] text-lg font-extrabold text-[#172033]">
+                {{ book.title }}
+              </dd>
+            </div>
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Type</dt>
+              <dd class="m-0 mt-1 text-lg font-extrabold text-[#172033]">{{ book.type }}</dd>
+            </div>
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Language</dt>
+              <dd class="m-0 mt-1 text-lg font-extrabold text-[#172033]">{{ book.language }}</dd>
+            </div>
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Pages altogether</dt>
+              <dd class="m-0 mt-1 text-lg font-extrabold text-[#172033]">{{ book.totalPages }}</dd>
+            </div>
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Current page</dt>
+              <dd class="m-0 mt-1 text-lg font-extrabold text-[#172033]">{{ book.currentPage }}</dd>
+            </div>
+            <div class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4">
+              <dt class="text-xs font-extrabold uppercase text-[#657087]">Pages left</dt>
+              <dd class="m-0 mt-1 text-lg font-extrabold text-[#172033]">
+                {{ remainingPages(book) }}
+              </dd>
+            </div>
+          </dl>
+
+          <section
+            class="rounded-lg border border-[#dce2ec] bg-[#f7f9fc] p-4"
+            aria-label="Reading progress"
+          >
+            <div class="flex items-baseline justify-between gap-3 font-extrabold">
+              <span>Progress</span>
+              <strong class="text-3xl text-[#b54138]">{{ progressFor(book) }}%</strong>
+            </div>
+            <div class="mt-3 h-3 overflow-hidden rounded-full bg-[#d9e2ed]" aria-hidden="true">
+              <span
+                class="block h-full rounded-full bg-gradient-to-r from-[#1f6f78] to-[#c65f4d]"
+                [style.width.%]="progressFor(book)"
+              ></span>
+            </div>
+            <p class="m-0 mt-2 font-bold text-[#657087]">
+              Page {{ book.currentPage }} of {{ book.totalPages }}
+            </p>
+          </section>
+        </article>
+      } @else {
+        <p class="m-0 grid min-h-56 place-items-center text-center font-extrabold text-[#657087]">
+          No books are available on this shelf.
+        </p>
+      }
+    </div>
+  </section>
+
+  <section
+    class="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] bg-[#f7f9fc]"
+    aria-labelledby="book-shelf-title"
+  >
+    <header
+      class="flex min-h-[84px] items-center justify-between gap-4 border-b border-[#dce2ec] bg-[#eef3fb] px-6 py-[18px] max-[860px]:items-start max-[860px]:flex-col"
+    >
+      <div>
+        <p class="m-0 mb-1 text-xs font-extrabold uppercase text-[#1f6f78]">
+          {{ shelfCountLabel }}
+        </p>
+        <h2 id="book-shelf-title" class="m-0 text-3xl font-extrabold leading-tight text-[#172033]">
+          {{ shelfTitle }}
+        </h2>
+      </div>
+
+      <div class="flex flex-wrap gap-2.5" aria-label="Book shelf actions">
+        <button
+          class="min-h-10 cursor-pointer rounded-lg border-0 bg-white px-3.5 font-extrabold text-[#324255] shadow-[inset_0_0_0_1px_#cbd5e1]"
+          type="button"
+          (click)="shelfMode === 'current' ? showRetrospective() : showCurrentBooks()"
+        >
+          {{ shelfMode === 'current' ? 'Retrospective' : 'Current reads' }}
+        </button>
+        <button
+          class="min-h-10 cursor-pointer rounded-lg border-0 bg-[#1f6f78] px-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-55"
+          type="button"
+          (click)="openAddDialog()"
+        >
+          Add book
+        </button>
+      </div>
+    </header>
+
+    <div class="min-h-0 overflow-auto p-6">
+      @if (activeBooks.length) {
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(154px,1fr))] gap-5">
+          @for (book of activeBooks; track trackBook($index, book)) {
+            <button
+              class="book-button grid min-w-0 cursor-pointer gap-2.5 rounded-lg border border-transparent bg-transparent p-2.5 text-left transition hover:-translate-y-0.5 hover:border-[#a6bacb] hover:bg-white focus-visible:-translate-y-0.5 focus-visible:border-[#a6bacb] focus-visible:bg-white focus-visible:outline-none"
+              type="button"
+              [class.is-selected]="selectedBookId === book.id"
+              (click)="selectBook(book)"
+              [attr.aria-label]="'Select ' + book.title"
+            >
+              <span class="book-shell" aria-hidden="true">
+                <span class="book-cover {{ book.coverClass }}">
+                  <span class="text-xs font-extrabold uppercase">{{ book.type }}</span>
+                  <span class="cover-title">{{ book.title }}</span>
+                  <span class="justify-self-end text-xs font-extrabold uppercase"
+                    >{{ progressFor(book) }}%</span
+                  >
+                </span>
+              </span>
+              <span class="[overflow-wrap:anywhere] font-black leading-tight text-[#172033]">{{
+                book.title
+              }}</span>
+              <span class="text-xs font-extrabold uppercase text-[#657087]"
+                >{{ book.language }} / {{ book.currentPage }} of {{ book.totalPages }}</span
+              >
+            </button>
+          }
+        </div>
+      } @else {
+        <p class="m-0 grid min-h-56 place-items-center text-center font-extrabold text-[#657087]">
+          No books are available on this shelf.
+        </p>
+      }
+    </div>
+  </section>
+</main>
+
+@if (isBookDialogOpen) {
+  <div
+    class="fixed inset-0 z-10 grid place-items-center overflow-auto bg-[rgb(20_30_48_/58%)] p-4"
+    (click)="closeBookDialog()"
+  >
+    <section
+      class="relative w-[min(520px,100%)] rounded-lg bg-white p-7 shadow-[0_24px_80px_rgb(0_0_0_/25%)]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="book-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="absolute right-2.5 top-2.5 cursor-pointer border-0 bg-transparent text-xl font-extrabold text-[#657087]"
+        type="button"
+        (click)="closeBookDialog()"
+        aria-label="Close dialog"
+      >
+        &times;
+      </button>
+      <p class="m-0 mb-1 text-xs font-extrabold uppercase text-[#1f6f78]">{{ dialogEyebrow }}</p>
+      <h2 id="book-dialog-title" class="m-0 text-3xl font-extrabold leading-tight text-[#172033]">
+        {{ dialogTitle }}
+      </h2>
+
+      <form class="mt-5 grid gap-3.5" (ngSubmit)="saveBook()">
+        <label class="font-extrabold text-[#324255]" for="book-title">Title</label>
+        <input
+          class="min-h-10 w-full rounded-lg border border-[#b9c3d2] px-3 text-[#172033]"
+          id="book-title"
+          name="title"
+          type="text"
+          required
+          [(ngModel)]="bookDraft.title"
+        />
+
+        <fieldset class="m-0 border-0 p-0">
+          <legend class="font-extrabold text-[#324255]">Type</legend>
+          <div class="mt-1.5 grid grid-cols-2 gap-2.5 max-[860px]:grid-cols-1">
+            <label
+              class="flex min-h-10 items-center gap-2 rounded-lg border border-[#cbd5e1] px-3 font-extrabold text-[#324255]"
+            >
+              <input type="radio" name="type" value="technical" [(ngModel)]="bookDraft.type" />
+              Technical
+            </label>
+            <label
+              class="flex min-h-10 items-center gap-2 rounded-lg border border-[#cbd5e1] px-3 font-extrabold text-[#324255]"
+            >
+              <input type="radio" name="type" value="free time" [(ngModel)]="bookDraft.type" />
+              Free time
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="font-extrabold text-[#324255]" for="book-language">Language</label>
+        <select
+          class="min-h-10 w-full rounded-lg border border-[#b9c3d2] bg-white px-3 text-[#172033]"
+          id="book-language"
+          name="language"
+          required
+          [(ngModel)]="bookDraft.language"
+        >
+          @for (language of languages; track language) {
+            <option [value]="language">{{ language }}</option>
+          }
+        </select>
+
+        <div class="grid grid-cols-2 gap-2.5 max-[860px]:grid-cols-1">
+          <label class="font-extrabold text-[#324255]">
+            Total pages
+            <input
+              class="mt-1.5 min-h-10 w-full rounded-lg border border-[#b9c3d2] px-3 text-[#172033]"
+              name="totalPages"
+              type="number"
+              min="1"
+              step="1"
+              required
+              [(ngModel)]="bookDraft.totalPages"
+            />
+          </label>
+          <label class="font-extrabold text-[#324255]">
+            Current page
+            <input
+              class="mt-1.5 min-h-10 w-full rounded-lg border border-[#b9c3d2] px-3 text-[#172033]"
+              name="currentPage"
+              type="number"
+              min="0"
+              step="1"
+              required
+              [(ngModel)]="bookDraft.currentPage"
+            />
+          </label>
+        </div>
+
+        <div class="mt-2 flex flex-wrap justify-end gap-2.5">
+          <button
+            class="min-h-10 cursor-pointer rounded-lg border-0 bg-white px-3.5 font-extrabold text-[#324255] shadow-[inset_0_0_0_1px_#cbd5e1]"
+            type="button"
+            (click)="closeBookDialog()"
+          >
+            Cancel
+          </button>
+          <button
+            class="min-h-10 cursor-pointer rounded-lg border-0 bg-[#1f6f78] px-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-55"
+            type="submit"
+            [disabled]="
+              !bookDraft.title.trim() ||
+              !bookDraft.language.trim() ||
+              bookDraft.totalPages < 1 ||
+              bookDraft.currentPage < 0
+            "
+          >
+            Save book
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (progressBook; as book) {
+  <div
+    class="fixed inset-0 z-10 grid place-items-center overflow-auto bg-[rgb(20_30_48_/58%)] p-4"
+    (click)="closeProgressDialog()"
+  >
+    <section
+      class="relative w-[min(420px,100%)] rounded-lg bg-white p-7 shadow-[0_24px_80px_rgb(0_0_0_/25%)]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="progress-dialog-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="absolute right-2.5 top-2.5 cursor-pointer border-0 bg-transparent text-xl font-extrabold text-[#657087]"
+        type="button"
+        (click)="closeProgressDialog()"
+        aria-label="Close dialog"
+      >
+        &times;
+      </button>
+      <p class="m-0 mb-1 text-xs font-extrabold uppercase text-[#1f6f78]">Reading progress</p>
+      <h2
+        id="progress-dialog-title"
+        class="m-0 [overflow-wrap:anywhere] text-3xl font-extrabold leading-tight text-[#172033]"
+      >
+        {{ book.title }}
+      </h2>
+
+      <form class="mt-5 grid gap-3.5" (ngSubmit)="saveProgress()">
+        <label class="font-extrabold text-[#324255]" for="progress-page">Current page</label>
+        <input
+          class="min-h-10 w-full rounded-lg border border-[#b9c3d2] px-3 text-[#172033]"
+          id="progress-page"
+          name="progressPage"
+          type="number"
+          min="0"
+          [max]="book.totalPages"
+          step="1"
+          required
+          [(ngModel)]="progressPage"
+        />
+        <input
+          class="accent-[#1f6f78]"
+          type="range"
+          min="0"
+          [max]="book.totalPages"
+          step="1"
+          [(ngModel)]="progressPage"
+          name="progressSlider"
+          aria-label="Current page slider"
+        />
+        <p class="m-0 font-bold text-[#657087]">Page {{ progressPage }} of {{ book.totalPages }}</p>
+
+        <div class="mt-2 flex flex-wrap justify-end gap-2.5">
+          <button
+            class="min-h-10 cursor-pointer rounded-lg border-0 bg-white px-3.5 font-extrabold text-[#324255] shadow-[inset_0_0_0_1px_#cbd5e1]"
+            type="button"
+            (click)="closeProgressDialog()"
+          >
+            Cancel
+          </button>
+          <button
+            class="min-h-10 cursor-pointer rounded-lg border-0 bg-[#1f6f78] px-3.5 font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-55"
+            type="submit"
+            [disabled]="progressPage < 0"
+          >
+            Save progress
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

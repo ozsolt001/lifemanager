@@ -46,10 +46,10 @@
       @if (queue.length) {
         <ol class="flex h-full max-w-full gap-3">
           @for (item of queue; track trackQueueItem($index, item)) {
-            <li class="flex h-full min-w-[240px] max-w-[320px] flex-[0_0_280px] flex-col justify-between rounded-lg border border-[#dbeafe] bg-white p-4 shadow-[0_8px_24px_rgb(37_99_235_/8%)]">
+            <li class="flex h-full min-w-60 max-w-[320px] flex-[0_0_280px] flex-col justify-between rounded-lg border border-[#dbeafe] bg-white p-4 shadow-[0_8px_24px_rgb(37_99_235_/8%)]">
               <div>
                 <p class="m-0 text-xs font-extrabold uppercase tracking-[0.08em] text-blue-700">Queued concept</p>
-                <p class="mt-2 break-words text-base font-bold text-[#172033]">{{ formatPath(item.path) }}</p>
+                <p class="mt-2 wrap-break-word text-base font-bold text-[#172033]">{{ formatPath(item.path) }}</p>
               </div>
               <button class="mt-4 self-start rounded-md bg-[#eff6ff] px-3 py-2 text-sm font-bold text-blue-700 hover:text-blue-900" type="button" (click)="removeFromQueue(item.nodeId)">
                 Remove
@@ -85,28 +85,28 @@
               <div class="min-w-0">
                 @switch (depth) {
                   @case (1) {
-                    <h1 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h1>
+                    <h1 class="m-0 wrap-break-word" [class]="headingClass(depth)">{{ node.title }}</h1>
                   }
                   @case (2) {
-                    <h2 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h2>
+                    <h2 class="m-0 wrap-break-word" [class]="headingClass(depth)">{{ node.title }}</h2>
                   }
                   @case (3) {
-                    <h3 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h3>
+                    <h3 class="m-0 wrap-break-word  " [class]="headingClass(depth)">{{ node.title }}</h3>
                   }
                   @case (4) {
-                    <h4 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h4>
+                    <h4 class="m-0 wrap-break-word" [class]="headingClass(depth)">{{ node.title }}</h4>
                   }
                   @case (5) {
-                    <h5 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h5>
+                    <h5 class="m-0 wrap-break-word" [class]="headingClass(depth)">{{ node.title }}</h5>
                   }
                   @case (6) {
-                    <h6 class="m-0 break-words" [class]="headingClass(depth)">{{ node.title }}</h6>
+                    <h6 class="m-0 wrap-break-word" [class]="headingClass(depth)">{{ node.title }}</h6>
                   }
                   @default {
-                    <div class="m-0 break-words" role="heading" [attr.aria-level]="depth" [class]="headingClass(depth)">{{ node.title }}</div>
+                    <div class="m-0 wrap-break-word" role="heading" [attr.aria-level]="depth" [class]="headingClass(depth)">{{ node.title }}</div>
                   }
                 }
-                <p class="mt-1 break-words text-sm text-[#657087]">{{ formatPath(nodePath) }}</p>
+                <p class="mt-1 wrap-break-word text-sm text-[#657087]">{{ formatPath(nodePath) }}</p>
               </div>
             </div>
           </div>
