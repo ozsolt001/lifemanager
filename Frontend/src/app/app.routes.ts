@@ -4,6 +4,7 @@ import { Sports } from './components/sports/sports';
 import { Diet } from './components/diet/diet';
 import { Learning } from './components/learning/learning';
 import { Books } from './components/books/books';
+import { Diary } from './components/diary/diary';
 
 export const routes: Routes = [
   {
@@ -30,5 +31,10 @@ export const routes: Routes = [
     path: 'books',
     title: 'Books',
     component: Books,
+  },
+  {
+    path: 'diary',
+    title: 'Diary',
+    component: Diary,
   },
 ];
