@@ -93,7 +93,9 @@
       </div>
 
       @if (!editorReady) {
-        <div class="py-10 text-sm text-slate-400">Loading editor...</div>
+        <div class="py-10 text-sm text-slate-400">
+          {{ editorError || 'Loading editor...' }}
+        </div>
       }
 
       <div

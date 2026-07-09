@@ -1,6 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnDestroy,
@@ -205,6 +206,7 @@ class AudioTool implements BlockTool {
 })
 export class Diary implements AfterViewInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private editor: EditorJS | null = null;
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
@@ -212,6 +214,7 @@ export class Diary implements AfterViewInit, OnDestroy {
 
   pageTitle = 'Daily notes';
   editorReady = false;
+  editorError = '';
   savedAt = 'Draft';
   blockCount = 0;
 
@@ -220,87 +223,104 @@ export class Diary implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const [
-      { default: EditorJSConstructor },
-      { default: Header },
-      { default: List },
-      { default: Quote },
-      { default: Delimiter },
-      { default: ImageTool },
-      { default: Marker },
-      { default: InlineCode },
-    ] = await Promise.all([
-      import('@editorjs/editorjs'),
-      import('@editorjs/header'),
-      import('@editorjs/list'),
-      import('@editorjs/quote'),
-      import('@editorjs/delimiter'),
-      import('@editorjs/image'),
-      import('@editorjs/marker'),
-      import('@editorjs/inline-code'),
-    ]);
+    this.editorReady = false;
+    this.editorError = '';
 
-    this.editor = new EditorJSConstructor({
-      holder: this.editorHolder.nativeElement,
-      autofocus: true,
-      placeholder: 'Start writing...',
-      data: this.initialData(),
-      tools: {
-        header: {
-          class: Header as ToolConstructable,
-          inlineToolbar: true,
-          shortcut: 'CMD+SHIFT+H',
-          config: {
-            levels: [1, 2, 3],
-            defaultLevel: 2,
-            placeholder: 'Heading',
-          },
-        },
-        list: {
-          class: List as ToolConstructable,
-          inlineToolbar: true,
-          config: {
-            defaultStyle: 'unordered',
-          },
-        },
-        quote: {
-          class: Quote as ToolConstructable,
-          inlineToolbar: true,
-          shortcut: 'CMD+SHIFT+Q',
-          config: {
-            quotePlaceholder: 'Quote',
-            captionPlaceholder: 'Source',
-          },
-        },
-        delimiter: Delimiter as ToolConstructable,
-        image: {
-          class: ImageTool as ToolConstructable,
-          config: {
-            captionPlaceholder: 'Image caption',
-            uploader: {
-              uploadByFile: (file: File): Promise<ImageUploadResponse> =>
-                this.uploadImageFile(file),
-              uploadByUrl: (url: string): Promise<ImageUploadResponse> => this.uploadImageUrl(url),
+    try {
+      const [
+        { default: EditorJS },
+        { default: Header },
+        { default: List },
+        { default: Quote },
+        { default: Delimiter },
+        { default: ImageTool },
+        { default: Marker },
+        { default: InlineCode },
+      ] = await Promise.all([
+        import('@editorjs/editorjs'),
+        import('@editorjs/header'),
+        import('@editorjs/list'),
+        import('@editorjs/quote'),
+        import('@editorjs/delimiter'),
+        import('@editorjs/image'),
+        import('@editorjs/marker'),
+        import('@editorjs/inline-code'),
+      ]);
+
+      this.editor = new EditorJS({
+        holder: this.editorHolder.nativeElement,
+        placeholder: 'Start writing...',
+        data: this.initialData(),
+        tools: {
+          header: {
+            class: Header as ToolConstructable,
+            inlineToolbar: true,
+            shortcut: 'CMD+SHIFT+H',
+            config: {
+              levels: [1, 2, 3],
+              defaultLevel: 2,
+              placeholder: 'Heading',
             },
           },
+          list: {
+            class: List as ToolConstructable,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered',
+            },
+          },
+          quote: {
+            class: Quote as ToolConstructable,
+            inlineToolbar: true,
+            shortcut: 'CMD+SHIFT+Q',
+            config: {
+              quotePlaceholder: 'Quote',
+              captionPlaceholder: 'Source',
+            },
+          },
+          delimiter: Delimiter as ToolConstructable,
+          image: {
+            class: ImageTool as ToolConstructable,
+            config: {
+              captionPlaceholder: 'Image caption',
+              uploader: {
+                uploadByFile: (file: File): Promise<ImageUploadResponse> =>
+                  this.uploadImageFile(file),
+                uploadByUrl: (url: string): Promise<ImageUploadResponse> => this.uploadImageUrl(url),
+              },
+            },
+          },
+          audio: AudioTool as unknown as ToolConstructable,
+          marker: Marker as ToolConstructable,
+          inlineCode: InlineCode as ToolConstructable,
         },
-        audio: AudioTool as unknown as ToolConstructable,
-        marker: Marker as ToolConstructable,
-        inlineCode: InlineCode as ToolConstructable,
-      },
-      onReady: () => {
-        this.editorReady = true;
-        void this.captureEditorState();
-      },
-      onChange: () => {
-        void this.captureEditorState();
-      },
-    });
+        onReady: () => {
+          this.editorReady = true;
+          this.editorError = '';
+          void this.captureEditorState();
+          this.changeDetectorRef.markForCheck();
+          this.changeDetectorRef.detectChanges();
+        },
+        onChange: () => {
+          void this.captureEditorState();
+        },
+      });
+    } catch (error) {
+      this.handleEditorInitializationFailure(error);
+    }
   }
 
   ngOnDestroy(): void {
     this.editor?.destroy();
     this.editor = null;
+  }
+
+  handleEditorInitializationFailure(error?: unknown): void {
+    console.error('Failed to initialize the diary editor.', error);
+    this.editorReady = false;
+    this.editorError = 'Unable to load the editor. Please refresh the page.';
+    this.changeDetectorRef.markForCheck();
+    this.changeDetectorRef.detectChanges();
   }
 
   updateTitle(event: Event): void {
